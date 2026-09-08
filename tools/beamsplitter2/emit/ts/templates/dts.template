@@ -1,0 +1,37 @@
+{{define "dts"}}{{.Handwritten}}
+
+// ===== GENERATED DECLARATIONS =====
+//
+// Everything below is written by beamsplitter2 and is replaced on every run. It
+// describes the embind registrations exactly; edit the headers, not this file.
+// Anything hand-written belongs above the marker, where it is preserved.
+{{range .Aliases}}
+export type {{.Name}} = {{.Type}};
+{{- end}}
+{{range .Enums}}
+{{.Doc}}export enum {{.Name}} {
+{{- range .Values}}
+{{.Doc}}    {{.Name}} = {{.Value}},
+{{- end}}
+}
+{{end}}
+{{- range .Interfaces}}
+{{.Doc}}export interface {{.Name}} {
+{{- range .Fields}}
+{{.Doc}}    {{.Name}}?: {{.Type}};
+{{- end}}
+}
+{{end}}
+{{- range .Classes}}
+{{.Doc}}export class {{.Name}} {
+{{- if .Constructor}}
+    constructor();
+{{- end}}
+{{- range .Methods}}
+{{.Doc}}    public {{if .Static}}static {{end}}{{.Name}}({{.Params}}): {{.Return}};
+{{- end}}
+
+    /** Releases the wasm object this handle refers to. */
+    public delete(): void;
+}
+{{end}}{{end}}

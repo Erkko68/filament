@@ -1,0 +1,30 @@
+{{define "class"}}class_<{{.CppName}}>("{{.JsName}}")
+{{- range .Constructors}}
+    .constructor<{{.}}>()
+{{- end}}
+{{- range .Registrations}}
+{{.}}
+{{- end}}
+    ;
+{{end}}
+
+{{define "enum"}}enum_<{{.CppName}}>("{{.JsName}}")
+{{- range .Values}}
+    .value("{{.Name}}", {{.CppName}})
+{{- end}}
+    ;
+{{end}}
+
+{{define "struct"}}value_object<{{.CppName}}>("{{.JsName}}")
+{{- range .Fields}}
+    .field("{{.Name}}", &{{.CppName}})
+{{- end}}
+    ;
+{{end}}
+
+{{define "array"}}value_array<{{.CppName}}>("{{.JsName}}")
+{{- range .Elements}}
+    .element(&{{$.CppName}}::{{.}})
+{{- end}}
+    ;
+{{end}}

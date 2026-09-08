@@ -4,15 +4,39 @@ project(filament-js)
 
 set(EXTERN_POSTJS_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/wasmloader.js
-  ${CMAKE_CURRENT_SOURCE_DIR}/extensions_generated.js
-  ${CMAKE_CURRENT_SOURCE_DIR}/extensions.js
+  ${CMAKE_CURRENT_SOURCE_DIR}/extensions_common.js
+  ${CMAKE_CURRENT_SOURCE_DIR}/filament/BufferObject_extension.js
+  ${CMAKE_CURRENT_SOURCE_DIR}/filament/Camera_extension.js
+  ${CMAKE_CURRENT_SOURCE_DIR}/filament/ColorGrading_extension.js
+  ${CMAKE_CURRENT_SOURCE_DIR}/filament/Engine_extension.js
+  ${CMAKE_CURRENT_SOURCE_DIR}/filament/IndexBuffer_extension.js
+  ${CMAKE_CURRENT_SOURCE_DIR}/filament/LightManager_extension.js
+  ${CMAKE_CURRENT_SOURCE_DIR}/filament/Material_extension.js
+  ${CMAKE_CURRENT_SOURCE_DIR}/filament/Renderer_extension.js
+  ${CMAKE_CURRENT_SOURCE_DIR}/filament/Scene_extension.js
+  ${CMAKE_CURRENT_SOURCE_DIR}/filament/Texture_extension.js
+  ${CMAKE_CURRENT_SOURCE_DIR}/filament/VertexBuffer_extension.js
+  ${CMAKE_CURRENT_SOURCE_DIR}/filament/View_extension.js
+  ${CMAKE_CURRENT_SOURCE_DIR}/filament-utils/Ktx1Bundle_extension.js
+  ${CMAKE_CURRENT_SOURCE_DIR}/filament-utils/Manipulator_extension.js
+  ${CMAKE_CURRENT_SOURCE_DIR}/filament-utils/SurfaceOrientation_extension.js
+  ${CMAKE_CURRENT_SOURCE_DIR}/filament-utils/TangentSpaceMesh_extension.js
+  ${CMAKE_CURRENT_SOURCE_DIR}/gltfio/AssetLoader_extension.js
+  ${CMAKE_CURRENT_SOURCE_DIR}/gltfio/FilamentAsset_extension.js
+  ${CMAKE_CURRENT_SOURCE_DIR}/gltfio/FilamentInstance_extension.js
+  ${CMAKE_CURRENT_SOURCE_DIR}/gltfio/MaterialProvider_extension.js
+  ${CMAKE_CURRENT_SOURCE_DIR}/gltfio/NodeManager_extension.js
+  ${CMAKE_CURRENT_SOURCE_DIR}/gltfio/ResourceLoader_extension.js
   ${CMAKE_CURRENT_SOURCE_DIR}/utilities.js)
 
+# The generated bindings and the list of them both come from beamsplitter:
+#   cd tools/beamsplitter2 && go run . -emit ../../web/filament-js
+include(${CMAKE_CURRENT_SOURCE_DIR}/generated_sources.cmake)
+
 set(CPP_SRC
-  jsenums.cpp
-  jsenums_generated.cpp
-  jsbindings.cpp
-  jsbindings_generated.cpp)
+  ${FILAMENT_GENERATED_SRC}
+  ${FILAMENT_UTILS_GENERATED_SRC}
+  ${GLTFIO_GENERATED_SRC})
 
 # The emcc options are not documented well, the best place to find them is the source:
 # https://github.com/kripken/emscripten/blob/main/src/settings.js
@@ -56,13 +80,24 @@ set_target_properties(filament-js PROPERTIES
     LINK_DEPENDS "${EXTERN_POSTJS_SRC}"
     OUTPUT_NAME filament)
 
+target_include_directories(filament-js PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(filament-js PRIVATE filament math utils ktxreader filameshio uberarchive gltfio_core viewer camutils)
+
+# Optional standalone filamat-js WebAssembly target
+option(FILAMENT_JS_BUILD_FILAMAT "Build standalone filamat-js WebAssembly target" ON)
+if (FILAMENT_JS_BUILD_FILAMAT)
+  add_executable(filamat-js ${FILAMAT_GENERATED_SRC})
+  set_target_properties(filamat-js PROPERTIES
+      OUTPUT_NAME filamat)
+  target_include_directories(filamat-js PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+  target_link_libraries(filamat-js PRIVATE filamat utils)
+endif()
 
 # Copy package.json (et al) into the output folder to allow "npm publish" to gather the
 # artifacts that it needs.
 
 set(RESOURCES )
-foreach (RESOURCE package.json README.md filament.d.ts)
+foreach (RESOURCE package.json README.md filament.d.ts test.html)
     add_custom_command(
         OUTPUT ${PROJECT_BINARY_DIR}/${RESOURCE}
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${RESOURCE}

@@ -109,8 +109,8 @@ Filament.Buffer = function(typedarray) {
 /// PixelBuffer ::function:: Constructs a [PixelBufferDescriptor] by copying a typed array into \
 /// the WASM heap.
 /// typedarray ::argument:: Data to consume (e.g. Uint8Array, Uint16Array, Float32Array)
-/// format ::argument:: [PixelDataFormat]
-/// datatype ::argument:: [PixelDataType]
+/// format ::argument:: [backend$PixelDataFormat]
+/// datatype ::argument:: [backend$PixelDataType]
 /// ::retval:: [PixelBufferDescriptor]
 Filament.PixelBuffer = function(typedarray, format, datatype) {
     console.assert(typedarray.buffer instanceof ArrayBuffer);
@@ -125,7 +125,7 @@ Filament.PixelBuffer = function(typedarray, format, datatype) {
 /// CompressedPixelBuffer ::function:: Constructs a [PixelBufferDescriptor] for compressed texture
 /// data by copying a typed array into the WASM heap.
 /// typedarray ::argument:: Data to consume (e.g. Uint8Array, Uint16Array, Float32Array)
-/// cdatatype ::argument:: [CompressedPixelDataType]
+/// cdatatype ::argument:: [backend$CompressedPixelDataType]
 /// faceSize ::argument:: Number of bytes in each face (cubemaps only)
 /// ::retval:: [PixelBufferDescriptor]
 Filament.CompressedPixelBuffer = function(typedarray, cdatatype, faceSize) {
@@ -141,7 +141,7 @@ Filament.CompressedPixelBuffer = function(typedarray, cdatatype, faceSize) {
 
 Filament._loadFilamesh = function(engine, buffer, definstance, matinstances) {
     matinstances = matinstances || {};
-    const registry = new Filament.MeshReader$MaterialRegistry();
+    const registry = new Filament.filamesh$MeshReader$MaterialRegistry();
     for (let key in matinstances) {
         registry.set(key, matinstances[key]);
     }
@@ -204,7 +204,7 @@ Filament.IcoSphere = function(nsubdivs) {
     const normals = this.vertices;
 
     // Perform computations.
-    const sob = new Filament.SurfaceOrientation$Builder();
+    const sob = new Filament.geometry$SurfaceOrientation$Builder();
     sob.vertexCount(nverts);
     sob.normals(normals, 0)
     const orientation = sob.build();
@@ -329,9 +329,9 @@ Filament._createIblFromKtx1 = function(ktxdata, engine, options) {
 };
 
 Filament._createTextureFromImageFile = function(fileContents, engine, options) {
-    const Sampler = Filament.Texture$Sampler;
-    const TextureFormat = Filament.Texture$InternalFormat;
-    const PixelDataFormat = Filament.PixelDataFormat;
+    const Sampler = Filament.backend$SamplerType;
+    const TextureFormat = Filament.backend$TextureFormat;
+    const backend$PixelDataFormat = Filament.backend$PixelDataFormat;
 
     options = options || {};
     const srgb = !!options['srgb'];
@@ -343,12 +343,12 @@ Filament._createTextureFromImageFile = function(fileContents, engine, options) {
     let texformat, pbformat, pbtype;
     if (noalpha) {
         texformat = srgb ? TextureFormat.SRGB8 : TextureFormat.RGB8;
-        pbformat = PixelDataFormat.RGB;
-        pbtype = Filament.PixelDataType.UBYTE;
+        pbformat = backend$PixelDataFormat.RGB;
+        pbtype = Filament.backend$PixelDataType.UBYTE;
     } else {
         texformat = srgb ? TextureFormat.SRGB8_A8 : TextureFormat.RGBA8;
-        pbformat = PixelDataFormat.RGBA;
-        pbtype = Filament.PixelDataType.UBYTE;
+        pbformat = backend$PixelDataFormat.RGBA;
+        pbtype = Filament.backend$PixelDataType.UBYTE;
     }
 
     let tex = Filament.Texture.Builder()
